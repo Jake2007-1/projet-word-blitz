@@ -1,0 +1,48 @@
+public class GestionBD extends SQLiteOpenHelper {
+    private static GestionBD instance;
+    private Context context;
+    private SQLiteDatabase database;
+
+    public static GestionBD getInstance(Context context){
+        if (instance == null)
+            instance = new GestionBD(context);
+        return instance;
+    }
+    private GestionBD(@Nullable Context context) {
+        super(context, "word", null, 1);
+        this.context = context;
+        ouvrirBD();
+    }
+
+    private int executerFichier(SQLiteDatabase db, int ressourceID) throws IOException {
+        int cpt = 0;
+        InputStream insertStream = context.getResources().openRawResource(ressourceID);
+        BufferedReader br = new BufferedReader(new InputStreamReader(insertStream));
+        while (br.ready()){
+            String enonce = br.readLine();
+            db.execSQL(enonce);
+            cpt++;
+        }
+        br.close();
+        return cpt;
+    }
+
+    public void ouvrirBD(){
+        database = this.getWritableDatabase();
+    }
+
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        try {
+            executerFichier(db, R.raw.data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+    }
+}
